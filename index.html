@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Pixel Step Dot Movement</title>
+  <title>Pixel Step Square Movement</title>
   <style>
     body {
       margin: 0;
@@ -28,15 +28,15 @@
 
     const gridSize = 20; // size of each step
     let player = { x: 10, y: 10 }; // grid coords
+    let lastMoveTime = 0;
+    const moveDelay = 200; // ms delay between moves (slower)
 
     function draw() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       
-      // Draw player as white dot (circle)
+      // Draw player as white square
       ctx.fillStyle = 'white';
-      ctx.beginPath();
-      ctx.arc(player.x * gridSize + gridSize/2, player.y * gridSize + gridSize/2, gridSize/3, 0, Math.PI * 2);
-      ctx.fill();
+      ctx.fillRect(player.x * gridSize, player.y * gridSize, gridSize, gridSize);
     }
 
     function movePlayer(dx, dy) {
@@ -51,12 +51,15 @@
     }
 
     window.addEventListener('keydown', e => {
+      const now = Date.now();
+      if (now - lastMoveTime < moveDelay) return; // throttle movement speed
       switch(e.key) {
         case 'ArrowUp': movePlayer(0, -1); break;
         case 'ArrowDown': movePlayer(0, 1); break;
         case 'ArrowLeft': movePlayer(-1, 0); break;
         case 'ArrowRight': movePlayer(1, 0); break;
       }
+      lastMoveTime = now;
     });
 
     draw();
