@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Pixel Step Square Movement</title>
+  <title>Slower Pixel Step Square Movement</title>
   <style>
     body {
       margin: 0;
@@ -28,12 +28,17 @@
 
     const gridSize = 20; // size of each step
     let player = { x: 10, y: 10 }; // grid coords
+
+    // Movement control vars
+    let moveCooldown = 600; // ms between steps when holding keys (slower af)
     let lastMoveTime = 0;
-    const moveDelay = 200; // ms delay between moves (slower)
+
+    // Track keys held
+    let keysHeld = {};
 
     function draw() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-      
+
       // Draw player as white square
       ctx.fillStyle = 'white';
       ctx.fillRect(player.x * gridSize, player.y * gridSize, gridSize, gridSize);
@@ -42,7 +47,6 @@
     function movePlayer(dx, dy) {
       const newX = player.x + dx;
       const newY = player.y + dy;
-      // Keep inside canvas grid
       if (newX >= 0 && newX < canvas.width / gridSize && newY >= 0 && newY < canvas.height / gridSize) {
         player.x = newX;
         player.y = newY;
@@ -51,18 +55,35 @@
     }
 
     window.addEventListener('keydown', e => {
-      const now = Date.now();
-      if (now - lastMoveTime < moveDelay) return; // throttle movement speed
-      switch(e.key) {
-        case 'ArrowUp': movePlayer(0, -1); break;
-        case 'ArrowDown': movePlayer(0, 1); break;
-        case 'ArrowLeft': movePlayer(-1, 0); break;
-        case 'ArrowRight': movePlayer(1, 0); break;
-      }
-      lastMoveTime = now;
+      keysHeld[e.key] = true;
     });
 
+    window.addEventListener('keyup', e => {
+      keysHeld[e.key] = false;
+    });
+
+    function gameLoop() {
+      const now = Date.now();
+      if (now - lastMoveTime >= moveCooldown) {
+        if (keysHeld['ArrowUp']) {
+          movePlayer(0, -1);
+          lastMoveTime = now;
+        } else if (keysHeld['ArrowDown']) {
+          movePlayer(0, 1);
+          lastMoveTime = now;
+        } else if (keysHeld['ArrowLeft']) {
+          movePlayer(-1, 0);
+          lastMoveTime = now;
+        } else if (keysHeld['ArrowRight']) {
+          movePlayer(1, 0);
+          lastMoveTime = now;
+        }
+      }
+      requestAnimationFrame(gameLoop);
+    }
+
     draw();
+    gameLoop();
   </script>
 </body>
 </html>
